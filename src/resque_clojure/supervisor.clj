@@ -16,9 +16,19 @@
 (defn configure [c]
   (swap! config merge c))
 
+(defn start-agents-map [queues]
+  (doseq [[q count] queues]
+    (dotimes [i count]
+      (make-agent :queues q))))
+
+(defn start-agents [queues]
+  (if (map? queues)
+    (start-agents-map queues)
+    (start-agents-map {queues (-> @config :max-workers)})))
+
 (defn start [queues]
   "start listening for jobs on queues (vector)."
-  (dotimes [n (:max-workers @config)] (make-agent))
+  (start-agents queues)
   (listen-to queues)
   (dosync (ref-set run-loop? true))
   (.start (Thread. listen-loop)))
@@ -28,15 +38,17 @@
   (dosync (ref-set run-loop? false))
   (apply await-for (:max-shutdown-wait @config) @working-agents))
 
-(defn worker-complete [key ref old-state new-state]
-  (release-worker ref)
-  (dispatch-jobs)
-  (if (= :error (:result new-state))
-    (resque/report-error new-state)))
+(defn make-worker-complete-fn [& {:keys [queues]}]
+  (fn worker-complete [key ref old-state new-state]
+    (release-worker ref)
+    (dispatch-jobs :queues queues)
+    (if (= :error (:result new-state))
+      (resque/report-error new-state))))
 
-(defn dispatch-jobs []
+(defn dispatch-jobs [& {:keys [queues]}]
   (when-let [worker-agent (reserve-worker)]
-    (let [msg (resque/dequeue @watched-queues)]
+    (let [msg (resque/dequeue (or queues @watched-queues))]
+      (inspect msg)
       (if msg
         (send-off worker-agent worker/work-on msg)
         (release-worker worker-agent)))))
@@ -48,16 +60,16 @@
       (Thread/sleep (:poll-interval @config))
       (recur))))
 
-(defn make-agent []
+(defn make-agent [& {:keys [queues]}]
   (let [worker-agent (agent {} :error-handler (fn [a e] (throw e)))]
-    (add-watch worker-agent 'worker-complete worker-complete)
+    (add-watch worker-agent 'worker-complete (make-worker-complete-fn :queues queues))
     (dosync (commute idle-agents conj worker-agent))
     worker-agent))
 
 (defn reserve-worker []
   "either returns an idle worker or nil.
    marks the returned worker as working."
-  
+
   (dosync
    (let [selected (first @idle-agents)]
      (if selected
