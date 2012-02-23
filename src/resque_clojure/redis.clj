@@ -34,8 +34,8 @@
     (.destroy @pool)))
 
 (defmacro with-connection [& body]
-  `(binding [redis (get-connection)]
-     (let [result# ~@body]
+  `(binding [redis ((var get-connection))]
+     (let [result# (do ~@body)]
        (.returnResource @pool redis)
        result#)))
 
