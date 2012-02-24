@@ -1,5 +1,5 @@
 (ns resque-clojure.core
-  (:use [resque-clojure.util :only [filter-map]])
+  (:use [resque-clojure.util :only [filter-map desugar]])
   (:require [resque-clojure.resque :as resque]
             [resque-clojure.redis :as redis]
             [resque-clojure.supervisor :as supervisor]))
@@ -27,11 +27,6 @@
 
 (defn var-name [v]
   (str (-> v (meta) :ns) "/" (-> v (meta) :name)))
-
-(defmacro desugar
-  "Takes a single s-expr, like (foo bar), evaluates the args, returns a vector of strings"
-  [expr]
-  `(apply vector ~(var-name (resolve (first expr))) (map str [~@(rest expr)]) ))
 
 (defn enqueue* [queue worker-name & args]
   "create a new resque job

@@ -3,7 +3,7 @@
   (:require [resque-clojure.resque :as resque])
   (:require [clojure.data.json :as json])
   (:require [clj-time.core :as time])
-  (:use [resque-clojure.core :only (desugar)]))
+  (:use [resque-clojure.util :only (desugar)]))
 
 (declare enqueue-at* future-queue transfer transfer-all)
 
