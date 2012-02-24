@@ -13,4 +13,5 @@
 (defmacro desugar
   "Takes a single s-expr, like (foo bar), evaluates the args, returns a vector of strings"
   [expr]
-  `(apply vector ~(var-name (resolve (first expr))) (map str [~@(rest expr)])))
+  `(let [v# (var ~(first expr))]
+     (apply vector (var-name v#) (map str [~@(rest expr)]))))
