@@ -2,7 +2,8 @@
   (:use [resque-clojure.util :only [filter-map desugar]])
   (:require [resque-clojure.resque :as resque]
             [resque-clojure.redis :as redis]
-            [resque-clojure.supervisor :as supervisor]))
+            [resque-clojure.supervisor :as supervisor]
+            [resque-clojure.scheduler :as scheduler]))
 
 
 (defn configure [c]
