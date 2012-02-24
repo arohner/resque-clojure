@@ -25,9 +25,6 @@
     (resque/configure resque-map)
     (supervisor/configure super-map)))
 
-(defn var-name [v]
-  (str (-> v (meta) :ns) "/" (-> v (meta) :name)))
-
 (defn enqueue* [queue worker-name & args]
   "create a new resque job
      queue: name of the queue (does not start with resque:queue)
