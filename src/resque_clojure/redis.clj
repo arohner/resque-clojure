@@ -34,8 +34,8 @@
     (.destroy @pool)))
 
 (defmacro with-connection [& body]
-  `(binding [redis (get-connection)]
-     (let [result# ~@body]
+  `(binding [redis ((var get-connection))]
+     (let [result# (do ~@body)]
        (.returnResource @pool redis)
        result#)))
 
@@ -78,6 +78,30 @@
 
 (defcommand keys [pattern]
   (seq (.keys redis pattern)))
+
+(defcommand renamenx [old new]
+  (.renamenx redis old new))
+
+(defcommand zadd [key score member]
+  (.zadd redis key score member))
+
+(defcommand zrange [key min max]
+  (.zrange redis key min max))
+
+(defcommand zscore [key member]
+  (.zscore redis key member))
+
+(defcommand zcard [key]
+  (.zcard redis key))
+
+(defcommand zrange-by-score [key min max]
+  (.zrangeByScore redis key min max))
+
+(defcommand zrange-with-scores [key min max]
+  (.zrangeWithScores redis key min max))
+
+(defcommand brpoplpush [source dest timeout]
+  (.brpoplpush redis source dest timeout))
 
 ;; we could extend this to take multiple keys
 (defcommand del [key]

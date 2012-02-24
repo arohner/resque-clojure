@@ -12,7 +12,7 @@
 
 (deftest test-single-queue-integration
   (reset! our-list [])
-  (resque/enqueue "test-queue" "resque-clojure.test.integration/add-to-list" "one" 2 3)
+  (resque/enqueue "test-queue" (add-to-list "one" 2 3))
   (resque/start ["test-queue"])
   (Thread/sleep 50)
   (resque/stop)
@@ -20,8 +20,8 @@
 
 (deftest test-multiple-queue-integration
   (reset! our-list [])
-  (resque/enqueue "test-queue" "resque-clojure.test.integration/add-to-list" "one" 2 3)
-  (resque/enqueue "test-queu2" "resque-clojure.test.integration/add-to-list" "four")
+  (resque/enqueue "test-queue" (add-to-list "one" 2 3))
+  (resque/enqueue "test-queu2" (add-to-list "four"))
   (resque/start ["test-queue" "test-queu2"])
   (Thread/sleep 50)
   (resque/stop)
