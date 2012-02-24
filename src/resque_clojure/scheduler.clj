@@ -16,8 +16,11 @@
 (defn start []
   (future
     (loop []
-      (transfer-all)
-      (Thread/sleep (* 60 1000))
+      (try
+        (transfer-all)
+        (catch Throwable t
+          (.printStackTrace t)))
+      (Thread/sleep (* 30 1000))
       (recur))))
 
 ;; private
