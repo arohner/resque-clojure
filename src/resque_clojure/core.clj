@@ -39,6 +39,7 @@
 
 (defn start [queues]
   "start listening for jobs on queues (vector)."
+  (redis/init-pool)
   (supervisor/start queues)
   (scheduler/start))
 
