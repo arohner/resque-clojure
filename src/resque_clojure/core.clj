@@ -41,7 +41,8 @@
 
 (defn start [queues]
   "start listening for jobs on queues (vector)."
-  (supervisor/start queues))
+  (supervisor/start queues)
+  (scheduler/start))
 
 (defn stop []
   "stops polling queues. waits for all workers to complete current job"
