@@ -97,6 +97,9 @@
 (defcommand zrange-by-score [key min max]
   (.zrangeByScore redis key min max))
 
+(defcommand zrange-with-scores [key min max]
+  (.zrangeWithScores redis key min max))
+
 (defcommand brpoplpush [source dest timeout]
   (.brpoplpush redis source dest timeout))
 
