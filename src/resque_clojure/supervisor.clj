@@ -32,7 +32,7 @@
   "start listening for jobs on queues (vector)."
   (start-agents queues)
   (dosync (ref-set run-loop? true))
-  (.start (Thread. listen-loop)))
+  (.start (Thread. listen-loop "Resque Listen Loop")))
 
 (defn stop []
   "stops polling queues. waits for all workers to complete current job"
