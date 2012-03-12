@@ -41,7 +41,8 @@
 
 (defn worker-complete [key agent old-state new-state]
   (release-worker agent)
-  (dispatch-jobs :queues (get-queues agent))
+  (when @run-loop?
+    (dispatch-jobs :queues (get-queues agent)))
   (if (= :error (:result new-state))
     (resque/report-error new-state)))
 
