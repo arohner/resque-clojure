@@ -1,6 +1,7 @@
 (ns resque-clojure.supervisor
   (:require [resque-clojure.worker :as worker]
-            [resque-clojure.resque :as resque]))
+            [resque-clojure.resque :as resque])
+  (:use [clojure.tools.logging :only (errorf)]))
 
 (def run-loop? (ref true))
 (def working-agents (ref #{}))
@@ -56,7 +57,10 @@
 (defn listen-loop []
   (if @run-loop?
     (do
-      (dispatch-jobs)
+      (try
+        (dispatch-jobs)
+        (catch Exception e
+          (errorf e "resque listen loop, caught exception")))
       (Thread/sleep (:poll-interval @config))
       (recur))))
 
