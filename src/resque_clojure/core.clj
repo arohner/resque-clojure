@@ -31,7 +31,8 @@
      queue: name of the queue (does not start with resque:queue)
      worker-name: fully-qualified function name (ex. clojure.core/str in clojure, MyWorker in ruby)
      args: data to be sent as args to the worker. must be able to be serialized to json"
-  (apply resque/enqueue queue worker-name args))
+  (apply resque/enqueue queue worker-name args)
+  (supervisor/dispatch-jobs))
 
 (defmacro enqueue [queue expr]
   `(let [[worker-name# & args#] (desugar ~expr)]
