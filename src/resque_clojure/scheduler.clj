@@ -56,6 +56,5 @@
 
 (defn transfer-all []
   (doseq [q (all-future-queues)]
-    (println "transfer:" q)
     (transfer q)))
 
