@@ -3,7 +3,8 @@
   (:require [resque-clojure.resque :as resque])
   (:require [clojure.data.json :as json])
   (:require [clj-time.core :as time])
-  (:use [resque-clojure.util :only (desugar)]))
+  (:use [resque-clojure.util :only (desugar)]
+        [clojure.tools.logging :only (errorf)]))
 
 (declare enqueue-at* future-queue transfer transfer-all)
 
@@ -13,15 +14,17 @@
   `(let [[worker-name# & args#] (desugar ~expr)]
      (apply enqueue-at* ~at ~queue worker-name# args#)))
 
+(defn listen-loop []
+  (loop []
+    (try
+      (transfer-all)
+      (catch Throwable t
+        (errorf t "resque scheduler loop, caught exception")))
+    (Thread/sleep (* 5 1000))
+    (recur)))
+
 (defn start []
-  (future
-    (loop []
-      (try
-        (transfer-all)
-        (catch Throwable t
-          (.printStackTrace t)))
-      (Thread/sleep (* 30 1000))
-      (recur))))
+  (.start (Thread. listen-loop "Resque Scheduler")))
 
 ;; private
 
